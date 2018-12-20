@@ -16,6 +16,19 @@ class App extends Component {
     this.dateToString=this.dateToString.bind(this);
     this.createCalendar=this.createCalendar.bind(this);
     this.drawCalendar=this.drawCalendar.bind(this);
+    this.addWorker=this.addWorker.bind(this);
+  }
+
+  addWorker(w){
+    console.log(w);
+    let allWorkers=[...this.state.workers];
+    if(w.length>0&&allWorkers.indexOf(w)===-1){
+      allWorkers.push(w);
+      console.log(allWorkers);
+      this.setState({
+        workers:allWorkers
+      });
+   }
   }
 
   dateToString(n){
@@ -70,6 +83,7 @@ class App extends Component {
         <div className="App">
           <div className="head-grid">
             <YearMonthForm setData={this.setData}/>
+            <Addworker addWorker={this.addWorker}/>
           </div>
           <div className="calendar-container">     
             <Calendar myCalendar={this.state.calendar}/>
@@ -82,11 +96,38 @@ class App extends Component {
   class Addworker extends Component{
     constructor(props){
       super(props);
+      this.state={
+        actualWorker:""
+      }
+      this.preventDefault=this.preventDefault.bind(this);
+      this.handleNewWorker=this.handleNewWorker.bind(this);
+      this.sendWorker=this.sendWorker.bind(this);
+    }
+
+    sendWorker(){
+      this.props.addWorker(this.state.actualWorker);
+    }
+
+    handleNewWorker(e){
+      this.setState({
+        actualWorker:e.target.value
+      })
+    }
+
+    preventDefault(event){
+      console.log("prevent default");
+      event.preventDefault();
     }
 
     render(){
       return(
-        <div className="ciao"></div>
+        <div className="worker-form">
+          <p>Aggiungi un lavoratore:</p>
+          <form id="date-form" onSubmit={this.preventDefault}>
+            <input id="month" placeholder="nome" value={this.state.actualWorker} onChange={this.handleNewWorker}/>
+            <button id="submit" onClick={this.sendWorker}/>
+          </form>
+        </div>
       )
     }
   }
