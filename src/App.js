@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-
 import Jsjoda from 'js-joda';
-import logo from './logo.svg';
+import Button from '@material-ui/core/Button';
 import './App.css';
 
 class App extends Component {
@@ -102,20 +101,47 @@ class App extends Component {
             <Calendar myCalendar={this.state.calendar}/>
           </div>
           <div className="workers-calendar-container">
-            <WorkersCalendar workers = {this.state.workers}/>
+            <WorkersCalendar myCalendar={this.state.calendar} workers = {this.state.workers}/>
           </div>     
         </div>
       );
     }
   }
 
-  class WorkersCalendar extends Component{
+  class WritableCalendar extends Component{
     render(){
       return(
-        <div>Ciao</div>
+        "culo"
       )
     }
+
   }
+
+  class WorkersCalendar extends Component{
+    render(){
+      //se è disegnato il calendario e ci sono lavoratori
+      if(this.props.myCalendar.length>0&&this.props.workers.length>0){
+        let WorkersAndCalendars=this.props.workers.map((e, i)=>{
+          return(
+            <div className="singleWorker" key={e}>
+            {e}
+            <WritableCalendar worker ={e} myCalendar={this.props.myCalendar}/>
+            </div>
+            )
+        });
+
+        return(
+          <div>
+            {WorkersAndCalendars}
+          </div>
+      )
+      }
+      else {
+      return null;
+      }
+      }
+    }
+  
 
   class Addworker extends Component{
     constructor(props){
@@ -151,7 +177,7 @@ class App extends Component {
           <p>Aggiungi un lavoratore:</p>
           <form id="date-form" onSubmit={this.preventDefault}>
             <input id="month" placeholder="nome" value={this.state.actualWorker} onChange={this.handleNewWorker}/>
-            <button id="submit" onClick={this.sendWorker}/>
+            <Button value="" variant="contained" color="primary" id="submit" onClick={this.sendWorker}>Aggiungi</Button>
           </form>
           <Drawworkers removeWorker={this.props.removeWorker} workers = {this.props.workers}/>
         </div>
@@ -164,8 +190,8 @@ class App extends Component {
       if(this.props.workers.length>0){
         let allWorkers=this.props.workers.map((e, i)=>{
           return(
-            <div className="singleWorker">
-            {e}<button value={e} onClick={this.props.removeWorker}>Rimuovi</button>
+            <div className="singleWorker" key={e}>
+            {e}<Button value={e} onClick={this.props.removeWorker}>Rimuovi</Button>
             </div>
             )
         });
