@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+
 import Jsjoda from 'js-joda';
 import logo from './logo.svg';
 import './App.css';
@@ -17,6 +18,7 @@ class App extends Component {
     this.createCalendar=this.createCalendar.bind(this);
     this.drawCalendar=this.drawCalendar.bind(this);
     this.addWorker=this.addWorker.bind(this);
+    this.removeWorker=this.removeWorker.bind(this);
   }
 
   addWorker(w){
@@ -29,6 +31,18 @@ class App extends Component {
         workers:allWorkers
       });
    }
+  }
+
+  removeWorker(w){
+    let myValue=w.currentTarget.value;
+    let allWorkers=[...this.state.workers];
+    if(myValue.length>0&&allWorkers.indexOf(myValue)!==-1){
+      let index=allWorkers.indexOf(myValue);
+      allWorkers.splice(index, 1);  
+      this.setState({
+        workers:allWorkers
+      });
+    }
   }
 
   dateToString(n){
@@ -50,7 +64,6 @@ class App extends Component {
     var LocalDate = require("js-joda").LocalDate;
     let stringedYear=this.dateToString(this.state.year);
     let stringedMonth=this.dateToString(this.state.month);
-
     let myDate=(stringedYear+"-"+stringedMonth+"-01");
     let myMonth = [];
     var monthLength = LocalDate.parse(myDate).lengthOfMonth();
@@ -83,13 +96,24 @@ class App extends Component {
         <div className="App">
           <div className="head-grid">
             <YearMonthForm setData={this.setData}/>
-            <Addworker addWorker={this.addWorker}/>
+            <Addworker workers = {this.state.workers} addWorker={this.addWorker} removeWorker={this.removeWorker}/>
           </div>
           <div className="calendar-container">     
             <Calendar myCalendar={this.state.calendar}/>
+          </div>
+          <div className="workers-calendar-container">
+            <WorkersCalendar workers = {this.state.workers}/>
           </div>     
         </div>
       );
+    }
+  }
+
+  class WorkersCalendar extends Component{
+    render(){
+      return(
+        <div>Ciao</div>
+      )
     }
   }
 
@@ -106,6 +130,9 @@ class App extends Component {
 
     sendWorker(){
       this.props.addWorker(this.state.actualWorker);
+      this.setState({
+        actualWorker:""
+      })
     }
 
     handleNewWorker(e){
@@ -115,7 +142,6 @@ class App extends Component {
     }
 
     preventDefault(event){
-      console.log("prevent default");
       event.preventDefault();
     }
 
@@ -127,8 +153,32 @@ class App extends Component {
             <input id="month" placeholder="nome" value={this.state.actualWorker} onChange={this.handleNewWorker}/>
             <button id="submit" onClick={this.sendWorker}/>
           </form>
+          <Drawworkers removeWorker={this.props.removeWorker} workers = {this.props.workers}/>
         </div>
       )
+    }
+  }
+
+  class Drawworkers extends Component{
+    render(){
+      if(this.props.workers.length>0){
+        let allWorkers=this.props.workers.map((e, i)=>{
+          return(
+            <div className="singleWorker">
+            {e}<button value={e} onClick={this.props.removeWorker}>Rimuovi</button>
+            </div>
+            )
+        });
+
+        return (
+            <div className="allWorkers">
+            {allWorkers}
+            </div>
+        )
+      }
+      else {
+        return null;
+      }
     }
   }
 
