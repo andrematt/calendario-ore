@@ -110,22 +110,74 @@ class App extends Component {
 
   class WritableCalendar extends Component{
     render(){
+      let allWriteableCells=this.props.myCalendar.map((e, i)=>{
+        return(
+          <WriteableCell updateTotal={this.props.updateTotal} className="singleCell" myData={e} myNumber={i}/>
+        )
+      });
       return(
-        "culo"
+        <div class="allWriteableCells">
+          {allWriteableCells}
+        </div>
       )
     }
 
   }
 
+  class WriteableCell extends Component{
+    constructor(props){
+      super(props);
+      this.state = {
+        hours:0
+      }
+      this.getState=this.getState.bind(this);
+      this.handleHours=this.handleHours.bind(this);
+    }
+
+    getState(){
+      return this.state.hours;
+    }
+
+    handleHours(e){
+      this.setState({
+        hours:e.target.value
+      }, () => {
+        this.props.updateTotal(this.state.hours); //propaga questo cambiamento al component padre 
+      });
+    }
+
+    render(){
+      return(
+        <span className="dayCell">
+        <input id="hours" value={this.state.hours} onChange={this.handleHours}/> 
+      </span>   
+      )
+    }
+  }
+
   class WorkersCalendar extends Component{
+    constructor(props){
+      super(props);
+      this.state = {
+        total:0
+      }
+      this.updateTotal=this.updateTotal.bind(this);
+    }
+
+    updateTotal(n){
+      this.setState({ //NO: sottrai il precedente e somma il nuovo
+        total:this.state.total+=n
+      })
+    }
+
     render(){
       //se è disegnato il calendario e ci sono lavoratori
       if(this.props.myCalendar.length>0&&this.props.workers.length>0){
         let WorkersAndCalendars=this.props.workers.map((e, i)=>{
           return(
             <div className="singleWorker" key={e}>
-            {e}
-            <WritableCalendar worker ={e} myCalendar={this.props.myCalendar}/>
+            <p>{e}, totale = {this.state.total}</p>
+            <WritableCalendar updateTotal={this.updateTotal} worker ={e} myCalendar={this.props.myCalendar}/>
             </div>
             )
         });

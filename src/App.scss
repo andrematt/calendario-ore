@@ -1,17 +1,29 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
 
-
-Button{
-    width:30px;
-    height:30px;
-}
-
 .head-grid{
     display: grid;
     grid-template-columns: 1fr 1fr;
     margin-bottom:50px;
 }
 
+
+.allWriteableCells{
+    background-color:violet;
+    display:flex;
+    margin-bottom:50px;
+    .dayCell{
+        width:35px;
+        background-color:yellow;
+        border:solid;
+        .number{
+            font-size:1.5em;
+        }
+        .name{
+            font-size:0.5em;
+
+        }
+    }
+}
 
 .allCells{
     background-color:violet;
