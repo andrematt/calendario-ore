@@ -6,14 +6,14 @@
     margin-bottom:50px;
 }
 
-
 .allWriteableCells{
-    background-color:violet;
     display:flex;
     margin-bottom:50px;
+    #dom{
+        background-color:yellow;
+    }
     .dayCell{
         width:35px;
-        background-color:yellow;
         border:solid;
         .number{
             font-size:1.5em;
@@ -26,12 +26,13 @@
 }
 
 .allCells{
-    background-color:violet;
     display:flex;
     margin-bottom:50px;
+    #dom{
+        background-color:yellow;
+    }
     .dayCell{
         width:35px;
-        background-color:yellow;
         border:solid;
         .number{
             font-size:1.5em;

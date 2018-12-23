@@ -6,13 +6,14 @@
 }
 
 .allWriteableCells {
-  background-color: violet;
   display: flex;
   margin-bottom: 50px;
 }
+.allWriteableCells #dom {
+  background-color: yellow;
+}
 .allWriteableCells .dayCell {
   width: 35px;
-  background-color: yellow;
   border: solid;
 }
 .allWriteableCells .dayCell .number {
@@ -23,13 +24,14 @@
 }
 
 .allCells {
-  background-color: violet;
   display: flex;
   margin-bottom: 50px;
 }
+.allCells #dom {
+  background-color: yellow;
+}
 .allCells .dayCell {
   width: 35px;
-  background-color: yellow;
   border: solid;
 }
 .allCells .dayCell .number {

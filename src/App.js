@@ -15,17 +15,49 @@ class App extends Component {
     this.setData=this.setData.bind(this);
     this.dateToString=this.dateToString.bind(this);
     this.createCalendar=this.createCalendar.bind(this);
-    this.drawCalendar=this.drawCalendar.bind(this);
     this.addWorker=this.addWorker.bind(this);
     this.removeWorker=this.removeWorker.bind(this);
+    this.translatename=this.translatename.bind(this);
+  }
+
+  translatename(n){
+    switch(n){
+      case'MONDAY':
+        return('lun');
+      
+      case'TUESDAY':
+        return('mar');
+      
+
+      case'WEDNESDAY':
+        return('mer');
+      
+        
+      case'THURSDAY':
+        return('gio');
+      
+        
+      case'FRIDAY':
+        return('ven');
+      
+
+      case'SATURDAY':
+        return('sab');
+      
+    
+      case'SUNDAY':
+        return('dom');
+      
+      
+        default:
+        return("");
+    }
   }
 
   addWorker(w){
-    console.log(w);
     let allWorkers=[...this.state.workers];
     if(w.length>0&&allWorkers.indexOf(w)===-1){
       allWorkers.push(w);
-      console.log(allWorkers);
       this.setState({
         workers:allWorkers
       });
@@ -55,10 +87,6 @@ class App extends Component {
     return stringed;
 }
 
-  drawCalendar(){ //passCalendar? così che se il comp calendar ha lunghezza > 0 draw
-    console.log("It works!!", this.state.calendar.length);
-  }
-
   createCalendar(){
     var LocalDate = require("js-joda").LocalDate;
     let stringedYear=this.dateToString(this.state.year);
@@ -75,11 +103,9 @@ class App extends Component {
 
     this.setState({
       calendar:myMonth
-    }, () => {
-      this.drawCalendar(); //callback needed because setState is not immediate!
-  });
+    });
   
-}
+  }
 
   setData(month, year){
     this.setState({
@@ -98,64 +124,58 @@ class App extends Component {
             <Addworker workers = {this.state.workers} addWorker={this.addWorker} removeWorker={this.removeWorker}/>
           </div>
           <div className="calendar-container">     
-            <Calendar myCalendar={this.state.calendar}/>
+            <Calendar translatename={this.translatename} myCalendar={this.state.calendar}/>
           </div>
           <div className="workers-calendar-container">
-            <WorkersCalendar myCalendar={this.state.calendar} workers = {this.state.workers}/>
+            <WorkersCalendar translatename={this.translatename} myCalendar={this.state.calendar} workers = {this.state.workers}/>
           </div>     
         </div>
       );
     }
   }
 
-  class WritableCalendar extends Component{
-    render(){
-      let allWriteableCells=this.props.myCalendar.map((e, i)=>{
-        return(
-          <WriteableCell updateTotal={this.props.updateTotal} className="singleCell" myData={e} myNumber={i}/>
-        )
-      });
-      return(
-        <div class="allWriteableCells">
-          {allWriteableCells}
-        </div>
-      )
-    }
-
-  }
-
+  
   class WriteableCell extends Component{
     constructor(props){
       super(props);
       this.state = {
+        previousHours:0,
         hours:0
       }
       this.getState=this.getState.bind(this);
       this.handleHours=this.handleHours.bind(this);
     }
-
+    
     getState(){
       return this.state.hours;
     }
-
+    
     handleHours(e){
+      let actualValue = e.target.value; 
+      if (actualValue==="" || actualValue===null || actualValue===undefined){
+        actualValue=0;
+      }
       this.setState({
-        hours:e.target.value
+        previousHours:this.state.hours,
+        hours:actualValue
       }, () => {
-        this.props.updateTotal(this.state.hours); //propaga questo cambiamento al component padre 
+        this.props.updateTotal(this.state.hours, this.state.previousHours); //propaga questo cambiamento al component padre 
       });
     }
-
+    
     render(){
+      let day=this.props.myData.dayOfWeek();
+      let nameEng=(day.name()); 
+      let name=this.props.translatename(nameEng);
       return(
-        <span className="dayCell">
-        <input id="hours" value={this.state.hours} onChange={this.handleHours}/> 
-      </span>   
+        <span className="dayCell" id={name}>
+          <input id="hours" value={this.state.hours} onChange={this.handleHours}/> 
+        </span>   
       )
     }
   }
-
-  class WorkersCalendar extends Component{
+  
+  class WritableCalendar extends Component{
     constructor(props){
       super(props);
       this.state = {
@@ -164,21 +184,39 @@ class App extends Component {
       this.updateTotal=this.updateTotal.bind(this);
     }
 
-    updateTotal(n){
-      this.setState({ //NO: sottrai il precedente e somma il nuovo
-        total:this.state.total+=n
+    updateTotal(actual, previous){
+      if (!isNaN(parseFloat(actual)) && isFinite(actual)){
+        let newTotal=parseFloat(this.state.total)-parseFloat(previous)+parseFloat(actual);
+        this.setState({ 
+        total:newTotal
       })
+      }
     }
 
     render(){
-      //se è disegnato il calendario e ci sono lavoratori
+      let allWriteableCells=this.props.myCalendar.map((e, i)=>{
+        return(
+          <WriteableCell translatename={this.props.translatename} updateTotal={this.updateTotal} className="singleCell" myData={e} myNumber={i}/>
+        )
+      });
+      return(
+        <div className="singleWorker" key={this.props.worker}>
+        <p>{this.props.worker}, totale = {this.state.total}</p>
+        <div className="allWriteableCells">
+          {allWriteableCells}
+        </div>
+        </div>
+      )
+    }
+  }
+
+  class WorkersCalendar extends Component{ 
+    render(){
+      //se è disegnato il calendario generale e ci sono lavoratori
       if(this.props.myCalendar.length>0&&this.props.workers.length>0){
         let WorkersAndCalendars=this.props.workers.map((e, i)=>{
           return(
-            <div className="singleWorker" key={e}>
-            <p>{e}, totale = {this.state.total}</p>
-            <WritableCalendar updateTotal={this.updateTotal} worker ={e} myCalendar={this.props.myCalendar}/>
-            </div>
+              <WritableCalendar translatename={this.props.translatename} worker ={e} myCalendar={this.props.myCalendar}/>
             )
         });
 
@@ -271,7 +309,7 @@ class App extends Component {
       if(this.props.myCalendar.length>0){
         let allCells=this.props.myCalendar.map((e, i)=>{
           return(
-            <Cell className="singleCell" myData={e} myNumber={i}/>
+            <Cell translatename={this.props.translatename} className="singleCell" myData={e} myNumber={i}/>
           )
         });
 
@@ -290,51 +328,15 @@ class App extends Component {
 class Cell extends Component{
   constructor(props){
     super(props);
-    this.translatename=this.translatename.bind(this);
-  }
-
-  translatename(n){
-    switch(n){
-      case'MONDAY':
-        return('lun');
-      
-      case'TUESDAY':
-        return('mar');
-      
-
-      case'WEDNESDAY':
-        return('mer');
-      
-        
-      case'THURSDAY':
-        return('gio');
-      
-        
-      case'FRIDAY':
-        return('ven');
-      
-
-      case'SATURDAY':
-        return('sab');
-      
-    
-      case'SUNDAY':
-        return('dom');
-      
-      
-        default:
-        return("");
-    }
-
   }
   
   render(){
     let day=this.props.myData.dayOfWeek();
     let number = this.props.myNumber+1;
     let nameEng=(day.name()); 
-    let name=this.translatename(nameEng);
+    let name=this.props.translatename(nameEng);
     return(
-      <span className="dayCell">
+      <span className="dayCell" id={name}>
         <p className="number">{number}</p>
         <p className="name">{name}</p>
       </span>
