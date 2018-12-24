@@ -122,6 +122,7 @@ class App extends Component {
           <div className="head-grid">
             <YearMonthForm setData={this.setData}/>
             <Addworker workers = {this.state.workers} addWorker={this.addWorker} removeWorker={this.removeWorker}/>
+            <Addtype/>
           </div>
           <div className="calendar-container">     
             <Calendar translatename={this.translatename} myCalendar={this.state.calendar}/>
@@ -133,6 +134,29 @@ class App extends Component {
       );
     }
   }
+
+  class Addtype extends Component{
+    constructor(props){
+      super(props);
+      this.state = {
+        type:[]
+      }
+    }
+
+    render(){
+      return(
+        <div className="worker-form">
+          <p>Aggiungi un tipo di ore:</p>
+          <form id="date-form" onSubmit={this.preventDefault}>
+            <input id="month" placeholder="nome" value={this.state.actualWorker} onChange={this.handleNewWorker}/>
+            <Button value="" variant="contained" color="primary" id="submit" onClick={this.sendWorker}>Aggiungi</Button>
+          </form>
+        </div>
+      )
+    }
+
+  }
+
 
   
   class WriteableCell extends Component{
@@ -159,7 +183,7 @@ class App extends Component {
         previousHours:this.state.hours,
         hours:actualValue
       }, () => {
-        this.props.updateTotal(this.state.hours, this.state.previousHours); //propaga questo cambiamento al component padre 
+        this.props.updateTotal(this.state.hours, this.state.previousHours, this.props.myData); //propaga questo cambiamento al component padre 
       });
     }
     
@@ -179,17 +203,44 @@ class App extends Component {
     constructor(props){
       super(props);
       this.state = {
-        total:0
+        total:0,
+        allSundays:this.findSundays(this.props.myCalendar), //TODO: myCalendar viene aggiornato, ma questo state no!!
+        weekTotal:[]
       }
+      this.findSundays=this.findSundays.bind(this);
+      this.updateWeekTotal=this.updateWeekTotal.bind(this);
       this.updateTotal=this.updateTotal.bind(this);
     }
+    
+    findSundays(c){
+      let sundays=[...c].filter((e)=>{
+        return e.dayOfWeek().name()==="SUNDAY";
+      });
+      let sundaysNumber=sundays.map((e)=>{
+        return e.dayOfMonth();
+      })
+      return(sundaysNumber);
+      /*
+      this.setState({
+        allSundays:sundaysNumber
+      });
+      */
+    }
 
-    updateTotal(actual, previous){
+    updateWeekTotal(cellData){
+      //TODO
+      console.log("MYDATA: "); 
+      console.log(cellData.dayOfMonth());
+      let n = (cellData.dayOfMonth());
+
+    }
+
+    updateTotal(actual, previous, cellData){
       if (!isNaN(parseFloat(actual)) && isFinite(actual)){
         let newTotal=parseFloat(this.state.total)-parseFloat(previous)+parseFloat(actual);
         this.setState({ 
         total:newTotal
-      })
+      }, this.updateWeekTotal(cellData))
       }
     }
 
@@ -211,6 +262,15 @@ class App extends Component {
   }
 
   class WorkersCalendar extends Component{ 
+    constructor(props){
+      super(props);
+      this.findSundays=this.findSundays.bind(this); //TODO: ha senso spostare il trova domeniche nel comp padre?
+    }
+
+    findSundays(){ //TODO
+      return false;
+    }
+
     render(){
       //se è disegnato il calendario generale e ci sono lavoratori
       if(this.props.myCalendar.length>0&&this.props.workers.length>0){
@@ -382,7 +442,6 @@ class Cell extends Component{
     }
 
     preventDefault(event){
-      console.log("prevent default");
       event.preventDefault();
     }
 
