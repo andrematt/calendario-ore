@@ -204,35 +204,17 @@ class App extends Component {
       super(props);
       this.state = {
         total:0,
-        allSundays:this.findSundays(this.props.myCalendar), //TODO: myCalendar viene aggiornato, ma questo state no!!
+        allSundays:this.props.mySundays,
         weekTotal:[]
       }
-      this.findSundays=this.findSundays.bind(this);
       this.updateWeekTotal=this.updateWeekTotal.bind(this);
       this.updateTotal=this.updateTotal.bind(this);
     }
     
-    findSundays(c){
-      let sundays=[...c].filter((e)=>{
-        return e.dayOfWeek().name()==="SUNDAY";
-      });
-      let sundaysNumber=sundays.map((e)=>{
-        return e.dayOfMonth();
-      })
-      return(sundaysNumber);
-      /*
-      this.setState({
-        allSundays:sundaysNumber
-      });
-      */
-    }
-
     updateWeekTotal(cellData){
-      //TODO
       console.log("MYDATA: "); 
       console.log(cellData.dayOfMonth());
       let n = (cellData.dayOfMonth());
-
     }
 
     updateTotal(actual, previous, cellData){
@@ -267,16 +249,25 @@ class App extends Component {
       this.findSundays=this.findSundays.bind(this); //TODO: ha senso spostare il trova domeniche nel comp padre?
     }
 
-    findSundays(){ //TODO
-      return false;
+    findSundays(c){ 
+      let sundays=[...c].filter((e)=>{
+        return e.dayOfWeek().name()==="SUNDAY";
+      });
+      let sundaysNumber=sundays.map((e)=>{
+        return e.dayOfMonth();
+      })
+      return(sundaysNumber);
     }
 
     render(){
       //se è disegnato il calendario generale e ci sono lavoratori
+      //CALCOLA QUA ANCHE ALLSUNDAYS
+      let allSundays=this.findSundays(this.props.myCalendar);
+      
       if(this.props.myCalendar.length>0&&this.props.workers.length>0){
         let WorkersAndCalendars=this.props.workers.map((e, i)=>{
           return(
-              <WritableCalendar translatename={this.props.translatename} worker ={e} myCalendar={this.props.myCalendar}/>
+              <WritableCalendar mySundays={allSundays}translatename={this.props.translatename} worker ={e} myCalendar={this.props.myCalendar}/>
             )
         });
 
