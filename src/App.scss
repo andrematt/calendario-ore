@@ -1,9 +1,22 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
 
+
+    
 .head-grid{
+    
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     margin-bottom:50px;
+    .year-month-form{
+        margin:auto;
+    }
+    .worker-form{
+        margin:auto;
+    }
+}
+
+.worker-data{
+    margin-left:20px;
 }
 
 .allWriteableCells{
@@ -13,13 +26,16 @@
         background-color:yellow;
     }
     .dayCell{
-        width:35px;
+        min-width:35px;
         border:solid;
+        input{
+            width:30px;
+        }
         .number{
             font-size:1.5em;
         }
         .name{
-            font-size:0.5em;
+            font-size:1em;
 
         }
     }
@@ -32,13 +48,13 @@
         background-color:yellow;
     }
     .dayCell{
-        width:35px;
+        min-width:35px;
         border:solid;
         .number{
             font-size:1.5em;
         }
         .name{
-            font-size:0.5em;
+            font-size:0.8em;
 
         }
     }

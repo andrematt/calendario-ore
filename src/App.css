@@ -1,8 +1,18 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500");
 .head-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   margin-bottom: 50px;
+}
+.head-grid .year-month-form {
+  margin: auto;
+}
+.head-grid .worker-form {
+  margin: auto;
+}
+
+.worker-data {
+  margin-left: 20px;
 }
 
 .allWriteableCells {
@@ -13,14 +23,17 @@
   background-color: yellow;
 }
 .allWriteableCells .dayCell {
-  width: 35px;
+  min-width: 35px;
   border: solid;
+}
+.allWriteableCells .dayCell input {
+  width: 30px;
 }
 .allWriteableCells .dayCell .number {
   font-size: 1.5em;
 }
 .allWriteableCells .dayCell .name {
-  font-size: 0.5em;
+  font-size: 1em;
 }
 
 .allCells {
@@ -31,14 +44,14 @@
   background-color: yellow;
 }
 .allCells .dayCell {
-  width: 35px;
+  min-width: 35px;
   border: solid;
 }
 .allCells .dayCell .number {
   font-size: 1.5em;
 }
 .allCells .dayCell .name {
-  font-size: 0.5em;
+  font-size: 0.8em;
 }
 
 /*# sourceMappingURL=App.css.map */

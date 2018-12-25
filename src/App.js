@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Jsjoda from 'js-joda';
 import Button from '@material-ui/core/Button';
 import './App.css';
 
@@ -122,7 +121,6 @@ class App extends Component {
           <div className="head-grid">
             <YearMonthForm setData={this.setData}/>
             <Addworker workers = {this.state.workers} addWorker={this.addWorker} removeWorker={this.removeWorker}/>
-            <Addtype/>
           </div>
           <div className="calendar-container">     
             <Calendar translatename={this.translatename} myCalendar={this.state.calendar}/>
@@ -135,30 +133,6 @@ class App extends Component {
     }
   }
 
-  class Addtype extends Component{
-    constructor(props){
-      super(props);
-      this.state = {
-        type:[]
-      }
-    }
-
-    render(){
-      return(
-        <div className="worker-form">
-          <p>Aggiungi un tipo di ore:</p>
-          <form id="date-form" onSubmit={this.preventDefault}>
-            <input id="month" placeholder="nome" value={this.state.actualWorker} onChange={this.handleNewWorker}/>
-            <Button value="" variant="contained" color="primary" id="submit" onClick={this.sendWorker}>Aggiungi</Button>
-          </form>
-        </div>
-      )
-    }
-
-  }
-
-
-  
   class WriteableCell extends Component{
     constructor(props){
       super(props);
@@ -204,17 +178,33 @@ class App extends Component {
       super(props);
       this.state = {
         total:0,
-        allSundays:this.props.mySundays,
-        weekTotal:[]
+        allWeeks:this.props.myWeeks
       }
       this.updateWeekTotal=this.updateWeekTotal.bind(this);
       this.updateTotal=this.updateTotal.bind(this);
+      this.drawWeeksTotal=this.drawWeeksTotal.bind(this);
     }
+
+    drawWeeksTotal(){
+      let result = "";
+      this.state.allWeeks.forEach((e, i)=>{
+        result+=" settimana " + (i+1) + " = " + e.total +";";
+      });
+      return(result);
+    };
     
-    updateWeekTotal(cellData){
-      console.log("MYDATA: "); 
-      console.log(cellData.dayOfMonth());
+    updateWeekTotal(actual, previous, cellData){
       let n = (cellData.dayOfMonth());
+      for(let i=0; i<this.state.allWeeks.length;i++){
+        if(this.state.allWeeks[i].days.indexOf(n)!==-1){
+          let newWeekTotal=parseFloat(this.state.allWeeks[i].total)-parseFloat(previous)+parseFloat(actual); 
+          let newAllWeeks=this.state.allWeeks.slice(0, this.state.allWeeks.length);
+          newAllWeeks[i].total=newWeekTotal;
+          this.setState({ 
+            total:newAllWeeks
+           });
+        }
+      }
     }
 
     updateTotal(actual, previous, cellData){
@@ -222,19 +212,23 @@ class App extends Component {
         let newTotal=parseFloat(this.state.total)-parseFloat(previous)+parseFloat(actual);
         this.setState({ 
         total:newTotal
-      }, this.updateWeekTotal(cellData))
+      }, this.updateWeekTotal(actual, previous, cellData))
       }
     }
-
+    
     render(){
       let allWriteableCells=this.props.myCalendar.map((e, i)=>{
         return(
-          <WriteableCell translatename={this.props.translatename} updateTotal={this.updateTotal} className="singleCell" myData={e} myNumber={i}/>
+          <WriteableCell key={i} translatename={this.props.translatename} updateTotal={this.updateTotal} className="singleCell" myData={e} myNumber={i}/>
         )
       });
       return(
         <div className="singleWorker" key={this.props.worker}>
-        <p>{this.props.worker}, totale = {this.state.total}</p>
+        <div className="worker-data">
+        <h2>{this.props.worker}</h2>
+        <p>totale = {this.state.total};</p>
+        <p> {this.drawWeeksTotal()}</p>
+        </div>
         <div className="allWriteableCells">
           {allWriteableCells}
         </div>
@@ -246,28 +240,55 @@ class App extends Component {
   class WorkersCalendar extends Component{ 
     constructor(props){
       super(props);
-      this.findSundays=this.findSundays.bind(this); //TODO: ha senso spostare il trova domeniche nel comp padre?
+      this.createWeeks=this.createWeeks.bind(this);
+      this.findSundays=this.findSundays.bind(this);
     }
 
-    findSundays(c){ 
+    findSundays(c){
       let sundays=[...c].filter((e)=>{
         return e.dayOfWeek().name()==="SUNDAY";
       });
-      let sundaysNumber=sundays.map((e)=>{
+      let sundaysIndexes=sundays.map((e)=>{
         return e.dayOfMonth();
       })
-      return(sundaysNumber);
+      return sundaysIndexes;
+    }
+
+    createWeeks(c){
+      function week() {
+        this.days = [];
+        this.total = 0;
+      }
+
+      let weeks=[]; 
+      let lastIndex=0;
+      for(let i=1; i<c.length;i++){ //Il primo giorno è da saltare, altrimenti se è lunedì lo considera come fine della settimana precedente e prende come settimana un array vuoto (da 0 a 0)
+        if(c[i].dayOfWeek().name()==="MONDAY"){
+        let tempWeekDays = c.slice(lastIndex, i);
+        let thisWeek = new week();
+        tempWeekDays.forEach((e)=>{
+          thisWeek.days.push(e.dayOfMonth());
+        });
+        weeks.push(thisWeek); 
+        lastIndex=i;
+        }
+      }
+      
+      let lastDays = c.slice(lastIndex);
+      let thisWeek = new week();
+      lastDays.forEach((e)=>{
+        thisWeek.days.push(e.dayOfMonth());
+      });
+      weeks.push(thisWeek); 
+      return(weeks);
     }
 
     render(){
-      //se è disegnato il calendario generale e ci sono lavoratori
-      //CALCOLA QUA ANCHE ALLSUNDAYS
-      let allSundays=this.findSundays(this.props.myCalendar);
-      
+      let allWeeks=this.createWeeks(this.props.myCalendar);      
       if(this.props.myCalendar.length>0&&this.props.workers.length>0){
         let WorkersAndCalendars=this.props.workers.map((e, i)=>{
           return(
-              <WritableCalendar mySundays={allSundays}translatename={this.props.translatename} worker ={e} myCalendar={this.props.myCalendar}/>
+              <WritableCalendar myWeeks={allWeeks} translatename={this.props.translatename} worker ={e} key={i} myCalendar={this.props.myCalendar}/>
             )
         });
 
@@ -332,7 +353,7 @@ class App extends Component {
         let allWorkers=this.props.workers.map((e, i)=>{
           return(
             <div className="singleWorker" key={e}>
-            {e}<Button value={e} onClick={this.props.removeWorker}>Rimuovi</Button>
+            <h2>{e}<Button variant="contained" color="secondary" id="submit" value={e} onClick={this.props.removeWorker}>Rimuovi</Button></h2>
             </div>
             )
         });
@@ -360,7 +381,7 @@ class App extends Component {
       if(this.props.myCalendar.length>0){
         let allCells=this.props.myCalendar.map((e, i)=>{
           return(
-            <Cell translatename={this.props.translatename} className="singleCell" myData={e} myNumber={i}/>
+            <Cell translatename={this.props.translatename} className="singleCell" key={i} myData={e} myNumber={i}/>
           )
         });
 
@@ -377,10 +398,7 @@ class App extends Component {
 }
 
 class Cell extends Component{
-  constructor(props){
-    super(props);
-  }
-  
+
   render(){
     let day=this.props.myData.dayOfWeek();
     let number = this.props.myNumber+1;
@@ -442,17 +460,6 @@ class Cell extends Component{
       }
     }
 
-    /*
-    componentDidMount() {
-      // Direct reference to autocomplete DOM node
-      // (e.g. <input ref="autocomplete" ... />
-      const node = React.findDOMNode(this.refs.autocomplete);
-
-      // Evergreen event listener || IE8 event listener
-      const addEvent = node.addEventListener || node.attachEvent;
-    }
-    */
-
     render() {
       return (
         <div className="year-month-form">
@@ -460,9 +467,7 @@ class Cell extends Component{
           <form id="date-form" onSubmit={this.preventDefault}>
             <input id="month" placeholder="mese" type="number" value={this.state.month} onChange={this.handleMonthChange} name="mese" min="1" max="12" />
             <input id="year" placeholder="anno" type="number" value={this.state.year} onChange={this.handleYearChange} name="anno" min="2018" max="2025" />
-            <input id="submit" onClick={this.getFormData} type="submit" />
-            {//<button id="submit" onClick={this.props.setData}/> 
-            }
+            <Button variant="contained" color="primary" id="submit" onClick={this.getFormData} type="submit">Invia</Button> 
           </form>        
         </div>
       );
